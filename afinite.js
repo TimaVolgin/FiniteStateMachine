@@ -18,6 +18,8 @@ class Machine {
 	}
 
 	clearTransitionQueue() {
+		console.log('queue: ' + this.transitionQueue);
+
 		if (this.transitionQueue.length > 0) {
 			const newTransitionName = this.transitionQueue[0][0];
 			const newTransitionParam = this.transitionQueue[0][1];
@@ -25,10 +27,15 @@ class Machine {
 			new Promise((resolve, reject) => {
 				if (this.states[state].on[newTransitionName].hasOwnProperty('service')) {
 					this.states[state].on[newTransitionName].service(newTransitionParam);
+					resolve(1);
+					console.log('service');
 				} else {
 					this.state = this.states[state].on[newTransitionName].target;
+					console.log('target');
 				}
 		    }).then(() => {
+		    	console.log('THEN');
+
 		    	this.transitionQueue.shift();
 		    	this.clearTransitionQueue();
 		    })
@@ -38,8 +45,11 @@ class Machine {
 	transition(transitionName, transitionParam) {
 		this.transitionQueue.push([transitionName, transitionParam]);
 
+		// console.log('queue: ' + this.transitionQueue);
+		// console.log('queue.length: ' + this.transitionQueue.length);
+
 		if (this.transitionQueue.length == 1) {
-			clearTransitionQueue();
+			this.clearTransitionQueue();
 		}
 	}
 }
@@ -73,7 +83,7 @@ const testMachine = machine({
 							setState('second');
 
 							[state, setState] = useState();
-							console.log('stated: ' + state);
+							console.log('stated from 1: ' + state);
 	            		}, 3000);
 					}
 				}
@@ -90,7 +100,7 @@ const testMachine = machine({
 							setState('first');
 
 							[state, setState] = useState();
-							console.log('stated: ' + state);
+							console.log('stated from 2: ' + state);
 	            		}, 3000);
 					}
 				}
@@ -103,11 +113,14 @@ let [state, setState] = useState();
 console.log('start state: ' + state);
 
 testMachine.transition('move', undefined);
-
-[state, setState] = useState();
-console.log('after state ' + state);
+testMachine.transition('move', undefined);
 
 setTimeout(() => {
 	let [state, setState] = useState();
-	console.log('finish state: ' + state);
-}, 5000);
+	console.log('finish state 4: ' + state);
+}, 4000);
+
+setTimeout(() => {
+	let [state, setState] = useState();
+	console.log('finish state 7: ' + state);
+}, 7000);
